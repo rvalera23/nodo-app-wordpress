@@ -1,0 +1,26 @@
+---
+- name: Despliegue de Nodo WordPress
+  hosts: app_wordpress
+  become: yes
+  tasks:
+    - name: FASE 1 - Instalar Docker
+      shell: curl -sSL https://get.docker.com | sh
+      args:
+        creates: /usr/bin/docker
+
+    - name: FASE 3 - Crear carpetas de datos
+      file:
+        path: "/opt/servicios/wordpress_data"
+        state: directory
+        mode: '0755'
+
+    - name: FASE 4.2 - Descarga Secuencial de WordPress
+      shell: "docker pull wordpress:latest"
+
+    - name: Copiar Docker Compose
+      copy:
+        src: ../docker-compose.yml
+        dest: /opt/servicios/docker-compose.yml
+
+    - name: Levantar Aplicación
+      shell: "cd /opt/servicios && docker compose up -d"
