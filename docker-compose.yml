@@ -13,4 +13,4 @@ services:
       WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
       WORDPRESS_DB_NAME: wordpress_db
     volumes:
-      - ../wordpress_data:/var/lib/mysql # Persistencia de archivos
+      - ./wordpress_data:/var/www/html # Persistencia de archivos de la web
