@@ -1,26 +1,24 @@
 ---
-- name: Despliegue de Nodo WordPress
-  hosts: app_wordpress
+- name: Instalación Automática de Nodo WordPress
+  hosts: all
   become: yes
   tasks:
-    - name: FASE 1 - Instalar Docker
-      shell: curl -sSL https://get.docker.com | sh
-      args:
-        creates: /usr/bin/docker
+    - name: FASE 1 - Asegurar Docker y dependencias instaladas
+      apt:
+        name: [docker.io, docker-compose-v2, python3-pip]
+        state: present
+        update_cache: yes
 
-    - name: FASE 3 - Crear carpetas de datos
+    - name: FASE 3 - Crear directorio de persistencia
       file:
-        path: "/opt/servicios/wordpress_data"
+        path: "/opt/servicios/nodo-app-wordpress/wordpress_data"
         state: directory
         mode: '0755'
+        owner: 33 # Usuario www-data de WordPress
+        group: 33
 
-    - name: FASE 4.2 - Descarga Secuencial de WordPress
+    - name: FASE 4.2 - Pull de la imagen oficial
       shell: "docker pull wordpress:latest"
 
-    - name: Copiar Docker Compose
-      copy:
-        src: ../docker-compose.yml
-        dest: /opt/servicios/docker-compose.yml
-
-    - name: Levantar Aplicación
-      shell: "cd /opt/servicios && docker compose up -d"
+    - name: FASE 5 - Lanzar WordPress conectado a DB remota
+      shell: "cd /opt/servicios/nodo-app-wordpress && docker compose up -d"
