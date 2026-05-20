@@ -5,20 +5,34 @@
   tasks:
     - name: FASE 1 - Asegurar Docker y dependencias instaladas
       apt:
-        name: [docker.io, docker-compose-v2, python3-pip]
+        name:
+          - docker.io
+          - docker-compose
+          - python3-pip
+          - curl
+          - git
         state: present
         update_cache: yes
 
-    - name: FASE 3 - Crear directorio de persistencia
+    - name: FASE 2 - Crear directorios de persistencia y backups (Estructura Absoluta)
       file:
         path: "/opt/servicios/nodo-app-wordpress/wordpress_data"
         state: directory
         mode: '0755'
-        owner: 33 # Usuario www-data de WordPress
-        group: 33
+        owner: "33"
+        group: "33"
 
-    - name: FASE 4.2 - Pull de la imagen oficial
+    - name: FASE 2.1 - Forzar árbol jerárquico de backups con herencia de permisos
+      file:
+        path: "/opt/servicios/nodo-app-wordpress/backups/wordpress_files"
+        state: directory
+        mode: '0755'
+        owner: "33"
+        group: "33"
+        recurse: yes
+
+    - name: FASE 2.2 - Pull de la imagen oficial
       shell: "docker pull wordpress:latest"
 
-    - name: FASE 5 - Lanzar WordPress conectado a DB remota
+    - name: FASE 3 - Lanzar WordPress conectado a DB remota
       shell: "cd /opt/servicios/nodo-app-wordpress && docker compose up -d"

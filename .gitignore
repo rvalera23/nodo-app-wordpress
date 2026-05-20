@@ -1,0 +1,4 @@
+.env
+.env.ejemplo
+backups/
+wordpress_data/
