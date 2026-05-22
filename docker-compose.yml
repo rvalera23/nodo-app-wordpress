@@ -5,6 +5,8 @@ services:
     image: wordpress:latest
     container_name: nodo_wordpress
     restart: unless-stopped
+    entrypoint: >
+      sh -c "rm -f /var/www/html/wp-config.php && docker-entrypoint.sh apache2-foreground"
     ports:
       - "8080:80"
     environment:

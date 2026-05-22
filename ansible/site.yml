@@ -34,10 +34,12 @@
     - name: FASE 2.2 - Pull de la imagen oficial
       shell: "docker pull wordpress:latest"
 
-    - name: FASE 2.5 - Limpiar configuracion vieja (Resiliencia - Auto-corrección)
-      file:
-        path: "/opt/servicios/nodo-app-wordpress/wordpress_data/wp-config.php"
-        state: absent
+    - name: FASE 2.5 - Limpieza quirúrgica de residuos
+      shell: |
+        docker compose down -v || true
+        rm -rf /opt/servicios/nodo-app-wordpress/wordpress_data/*
+      args:
+        chdir: /opt/servicios/nodo-app-wordpress/
 
     - name: FASE 3 - Lanzar WordPress conectado a DB remota
       shell: "cd /opt/servicios/nodo-app-wordpress && docker compose up -d"
