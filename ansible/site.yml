@@ -3,7 +3,7 @@
   hosts: all
   become: yes
   tasks:
-    - name: FASE 1 - Asegurar Docker y dependencias instaladas
+    - name: FASE 1 - Asegurar Docker y dependencias
       apt:
         name:
           - docker.io
@@ -14,7 +14,7 @@
         state: present
         update_cache: yes
 
-    - name: FASE 2 - Crear directorios de persistencia y backups (Estructura Absoluta)
+    - name: FASE 2 - Crear directorios de persistencia y backups
       file:
         path: "/opt/servicios/nodo-app-wordpress/wordpress_data"
         state: directory
@@ -22,7 +22,7 @@
         owner: "33"
         group: "33"
 
-    - name: FASE 2.1 - Forzar árbol jerárquico de backups con herencia de permisos
+    - name: FASE 2.1 - Estructura jerárquica de backups con herencia de permisos
       file:
         path: "/opt/servicios/nodo-app-wordpress/backups/wordpress_files"
         state: directory
@@ -34,7 +34,7 @@
     - name: FASE 2.2 - Pull de la imagen oficial
       shell: "docker pull wordpress:latest"
 
-    - name: FASE 2.5 - Limpieza quirúrgica de residuos
+    - name: FASE 2.5 - Limpieza de residuos
       shell: |
         docker compose down -v || true
         rm -rf /opt/servicios/nodo-app-wordpress/wordpress_data/*
