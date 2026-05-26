@@ -1,45 +1,36 @@
 ---
-- name: Instalación Automática de Nodo WordPress
+- name: Instalación Profesional de Nodo WordPress
   hosts: all
   become: yes
+  vars_files:
+    - group_vars/all.yml
+
   tasks:
-    - name: FASE 1 - Asegurar Docker y dependencias
+    - name: FASE 1 - Instalación de dependencias
       apt:
-        name:
-          - docker.io
-          - docker-compose
-          - python3-pip
-          - curl
-          - git
+        name: [docker.io, docker-compose, python3-pip, curl, git, net-tools, ufw]
         state: present
         update_cache: yes
 
-    - name: FASE 2 - Crear directorios de persistencia y backups
+    - name: FASE 2 - Estructura de carpetas y permisos
       file:
-        path: "/opt/servicios/nodo-app-wordpress/wordpress_data"
+        path: "/opt/servicios/nodo-app-wordpress/{{ item }}"
         state: directory
-        mode: '0755'
-        owner: "33"
+        owner: "33" # Usuario www-data
         group: "33"
-
-    - name: FASE 2.1 - Estructura jerárquica de backups con herencia de permisos
-      file:
-        path: "/opt/servicios/nodo-app-wordpress/backups/wordpress_files"
-        state: directory
         mode: '0755'
-        owner: "33"
-        group: "33"
-        recurse: yes
+      with_items: ['wordpress_data', 'backups/wordpress_files']
 
-    - name: FASE 2.2 - Pull de la imagen oficial
-      shell: "docker pull wordpress:latest"
+    - name: FASE 3 - Asegurar Redes
+      shell: "docker network ls | grep -q nodo_net || docker network create nodo_net"
 
-    - name: FASE 2.5 - Limpieza de residuos
-      shell: |
-        docker compose down -v || true
-        rm -rf /opt/servicios/nodo-app-wordpress/wordpress_data/*
-      args:
-        chdir: /opt/servicios/nodo-app-wordpress/
+    - name: FASE 4 - Desplegar configuración desde plantilla
+      template:
+        src: templates/docker-compose.yml.j2
+        dest: /opt/servicios/nodo-app-wordpress/docker-compose.yml
+        mode: '0644'
 
-    - name: FASE 3 - Lanzar WordPress conectado a DB remota
+    - name: FASE 5 - Lanzamiento del ecosistema
       shell: "cd /opt/servicios/nodo-app-wordpress && docker compose up -d"
+      register: deploy_result
+      changed_when: "'Created' in deploy_result.stdout or 'Recreated' in deploy_result.stdout"

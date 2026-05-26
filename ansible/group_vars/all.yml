@@ -1,0 +1,14 @@
+# --- CONFIGURACIÓN DE RENDIMIENTO PHP ---
+php_upload_limit: "256M"       # Aumentado para archivos grandes
+php_post_limit: "256M"         # Debe ser igual o mayor que upload_max_filesize
+php_memory_limit: "512M"       # Vital para plugins pesados como Elementor o Woocommerce
+php_max_execution_time: "300"  # 5 minutos para procesos largos (importaciones/backups)
+php_max_input_vars: "3000"     # Necesario para menús grandes y configuraciones de temas
+
+# --- CONFIGURACIÓN DE WORDPRESS ---
+wp_container_name: "wordpress_app"
+db_host_ip: "192.168.1.20"
+db_user: "nodo_user"
+db_name: "wordpress_db"
+db_password: "admin123*"
+wp_debug: false

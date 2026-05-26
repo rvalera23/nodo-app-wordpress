@@ -1,0 +1,30 @@
+services:
+  wordpress:
+    image: wordpress:latest
+    container_name: {{ wp_container_name }}
+    restart: unless-stopped
+    networks:
+      - nodo_net
+    environment:
+      WORDPRESS_DB_HOST: {{ db_host_ip }}:3306
+      WORDPRESS_DB_USER: {{ db_user }}
+      WORDPRESS_DB_PASSWORD: {{ db_password }}
+      WORDPRESS_DB_NAME: {{ db_name }}
+      
+      # Optimización de PHP inyectada por variables
+      PHP_UPLOAD_MAX_FILESIZE: {{ php_upload_limit }}
+      PHP_POST_MAX_SIZE: {{ php_post_limit }}
+      PHP_MEMORY_LIMIT: {{ php_memory_limit }}
+      PHP_MAX_EXECUTION_TIME: {{ php_max_execution_time }}
+      PHP_MAX_INPUT_VARS: {{ php_max_input_vars }}
+
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_MEMORY_LIMIT', '{{ php_memory_limit }}');
+        define('WP_MAX_MEMORY_LIMIT', '{{ php_memory_limit }}');
+        define('WP_DEBUG', {{ wp_debug | lower }});
+    volumes:
+      - ./wordpress_data:/var/www/html
+
+networks:
+  nodo_net:
+    external: true
