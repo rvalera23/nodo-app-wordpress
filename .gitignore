@@ -1,23 +1,27 @@
-# --- Datos sensibles y persistentes ---
+# --- Archivos generados dinámicamente por Ansible ---
+docker-compose.yml
+ansible/site.yml.retry
+
+# --- Configuración real y secretos (¡NUNCA SUBIR AL REPO!) ---
 .env
 .env.local
-.env.*.local
+.env.*
+ansible/group_vars/all.yml
 
-# --- Directorios de datos y backups (Nunca se suben al repo) ---
-wordpress_data/
-backups/
+# --- Directorios de datos, persistencia y backups ---
+/wordpress_data/
+/backups/
 
-# --- Artefactos de Docker ---
-# Opcional: Si generas archivos temporales de docker compose
-docker-compose.yml
-
-# --- Logs y archivos temporales de sistema ---
+# --- Artefactos, logs y archivos temporales ---
 *.log
 *.tmp
 .DS_Store
 __pycache__/
 *.pyc
 
-# --- Notas de Infraestructura ---
-# Si decides usar Ansible Vault, no ignores el archivo, pero sí los temporales
+# --- Permisos de Ansible Vault (si decides usarlo) ---
 .vault_pass
+
+# --- Lo que SÍ queremos en el repo (Plantillas y Ejemplos) ---
+# (Nota: Estos patrones no están ignorados, por lo que Git los rastreará)
+!ansible/group_vars/all.yml.example

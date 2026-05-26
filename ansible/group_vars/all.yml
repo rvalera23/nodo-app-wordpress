@@ -1,14 +1,19 @@
-# --- CONFIGURACIÓN DE RENDIMIENTO PHP ---
-php_upload_limit: "256M"       # Aumentado para archivos grandes
-php_post_limit: "256M"         # Debe ser igual o mayor que upload_max_filesize
-php_memory_limit: "512M"       # Vital para plugins pesados como Elementor o Woocommerce
-php_max_execution_time: "300"  # 5 minutos para procesos largos (importaciones/backups)
-php_max_input_vars: "3000"     # Necesario para menús grandes y configuraciones de temas
-
-# --- CONFIGURACIÓN DE WORDPRESS ---
+# ansible/group_vars/all.yml
 wp_container_name: "wordpress_app"
-db_host_ip: "192.168.1.20"
-db_user: "nodo_user"
+db_host_ip: "192.168.1.60" # IP de tu nodo-db-core
+db_user: "nodo_db_user"     # Debe coincidir con db_app_user en nodo-db-core
 db_name: "wordpress_db"
-db_password: "admin123*"
+db_password: "nododb2026!"  # Debe coincidir con db_app_password en nodo-db-core
 wp_debug: false
+
+# Variables requeridas por el Protocolo NODO
+base_path: "/opt/servicios/nodo-app-wordpress"
+backup_retention_days: 7
+php_upload_limit: "256M"
+php_post_limit: "256M"
+php_memory_limit: "512M"
+php_max_execution_time: "300"
+php_max_input_vars: "3000"
+
+
+wp_host_port: "10100"

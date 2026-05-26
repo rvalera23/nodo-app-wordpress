@@ -1,36 +1,71 @@
 ---
-- name: Instalación Profesional de Nodo WordPress
+- name: Instalación y Configuración del Nodo WordPress
   hosts: all
   become: yes
   vars_files:
     - group_vars/all.yml
-
   tasks:
-    - name: FASE 1 - Instalación de dependencias
-      apt:
-        name: [docker.io, docker-compose, python3-pip, curl, git, net-tools, ufw]
-        state: present
-        update_cache: yes
 
-    - name: FASE 2 - Estructura de carpetas y permisos
+    - name: FASE 0 - Instalacion profesional de Tailscale
+      block:
+        - name: Asegurar dependencias
+          apt: { name: [curl, gnupg], state: present, update_cache: yes }
+        - name: Instalar Tailscale
+          shell: curl -fsSL https://tailscale.com/install.sh | sh
+          args: { creates: /usr/bin/tailscale }
+
+    - name: FASE 1 - Docker y Firewall
+      block:
+        - name: Instalar Docker y UFW
+          apt: { name: [docker.io, docker-compose, ufw], state: present }
+        - name: Configurar UFW (Solo SSH permitido)
+          ufw: { rule: allow, port: '22', proto: tcp }
+        - name: Habilitar UFW
+          ufw: { state: enabled }
+
+    - name: FASE 2 - Preparación de directorios
       file:
         path: "/opt/servicios/nodo-app-wordpress/{{ item }}"
         state: directory
-        owner: "33" # Usuario www-data
+        owner: "33"    # ID del usuario 'www-data' en contenedor WordPress
         group: "33"
         mode: '0755'
-      with_items: ['wordpress_data', 'backups/wordpress_files']
+      with_items: ['wordpress_data', 'backups']
 
-    - name: FASE 3 - Asegurar Redes
-      shell: "docker network ls | grep -q nodo_net || docker network create nodo_net"
-
-    - name: FASE 4 - Desplegar configuración desde plantilla
+    - name: FASE 3 - Despliegue de configuración (Jinja2)
       template:
-        src: templates/docker-compose.yml.j2
-        dest: /opt/servicios/nodo-app-wordpress/docker-compose.yml
+        src: "templates/docker-compose.yml.j2"
+        dest: "/opt/servicios/nodo-app-wordpress/docker-compose.yml"
         mode: '0644'
 
-    - name: FASE 5 - Lanzamiento del ecosistema
-      shell: "cd /opt/servicios/nodo-app-wordpress && docker compose up -d"
-      register: deploy_result
-      changed_when: "'Created' in deploy_result.stdout or 'Recreated' in deploy_result.stdout"
+    - name: FASE 3.1 - Verificar conectividad con la DB antes de desplegar
+      wait_for:
+        host: "{{ db_host_ip }}"
+        port: 3306
+        timeout: 30
+      delegate_to: localhost
+
+    - name: FASE 4 - Levantar contenedor
+      shell: |
+        cd /opt/servicios/nodo-app-wordpress
+        docker compose up -d --force-recreate
+      async: 300  # Esperar hasta 300 segundos
+      poll: 10    # Revisar el estado cada 10 segundos
+
+    - name: FASE 5 - Automatización de backups
+      block:
+        - name: Crear script de backup
+          copy:
+            dest: /usr/local/bin/wp-backup.sh
+            mode: '0755'
+            content: |
+              #!/bin/bash
+              TIMESTAMP=$(date +%Y%m%d)
+              tar -czf /opt/servicios/nodo-app-wordpress/backups/wp_data_$TIMESTAMP.tar.gz /opt/servicios/nodo-app-wordpress/wordpress_data
+              find /opt/servicios/nodo-app-wordpress/backups -type f -mtime +7 -delete
+        - name: Programar Cron
+          cron:
+            name: "WordPress Daily Backup"
+            minute: "0"
+            hour: "4"
+            job: "/usr/local/bin/wp-backup.sh"

@@ -1,0 +1,9 @@
+#!/bin/bash
+BACKUP_PATH="{{ base_path }}/backups"
+TIMESTAMP=$(date +%Y%m%d_%H%M)
+
+# Respaldo completo de la carpeta de datos (incluye uploads, plugins, themes)
+tar -czf $BACKUP_PATH/wp_data_$TIMESTAMP.tar.gz {{ base_path }}/wordpress_data
+
+# Limpieza de backups antiguos (7 días)
+find $BACKUP_PATH -type f -name "wp_data_*" -mtime +{{ backup_retention_days | default(7) }} -delete

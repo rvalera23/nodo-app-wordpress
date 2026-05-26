@@ -1,16 +1,17 @@
 services:
-  wordpress:
+   wordpress:
     image: wordpress:latest
     container_name: {{ wp_container_name }}
     restart: unless-stopped
+    ports:
+      - "{{ wp_host_port }}:80"
     networks:
       - nodo_net
     environment:
       WORDPRESS_DB_HOST: {{ db_host_ip }}:3306
       WORDPRESS_DB_USER: {{ db_user }}
       WORDPRESS_DB_PASSWORD: {{ db_password }}
-      WORDPRESS_DB_NAME: {{ db_name }}
-      
+      WORDPRESS_DB_NAME: {{ db_name }}      
       # Optimización de PHP inyectada por variables
       PHP_UPLOAD_MAX_FILESIZE: {{ php_upload_limit }}
       PHP_POST_MAX_SIZE: {{ php_post_limit }}
@@ -27,4 +28,4 @@ services:
 
 networks:
   nodo_net:
-    external: true
+    driver: bridge

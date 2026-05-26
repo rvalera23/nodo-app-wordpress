@@ -1,0 +1,18 @@
+# ansible/group_vars/all.yml.example
+
+# Cambia estos valores en tu all.yml real (que debe estar en .gitignore)
+wp_container_name: "wordpress_app"
+db_host_ip: "192.168.1.XX"
+db_user: "tu_usuario_db"
+db_name: "nombre_db"
+db_password: "tu_contraseña_super_secreta"
+wp_debug: false
+
+# Protocolo NODO
+base_path: "/opt/servicios/nodo-app-wordpress"
+backup_retention_days: 7
+php_upload_limit: "256M"
+php_post_limit: "256M"
+php_memory_limit: "512M"
+php_max_execution_time: "300"
+php_max_input_vars: "3000"
