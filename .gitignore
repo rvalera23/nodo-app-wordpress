@@ -1,3 +1,23 @@
+# --- Datos sensibles y persistentes ---
+.env
+.env.local
+.env.*.local
+
+# --- Directorios de datos y backups (Nunca se suben al repo) ---
 wordpress_data/
 backups/
-.env
+
+# --- Artefactos de Docker ---
+# Opcional: Si generas archivos temporales de docker compose
+docker-compose.yml
+
+# --- Logs y archivos temporales de sistema ---
+*.log
+*.tmp
+.DS_Store
+__pycache__/
+*.pyc
+
+# --- Notas de Infraestructura ---
+# Si decides usar Ansible Vault, no ignores el archivo, pero sí los temporales
+.vault_pass
